@@ -1,38 +1,27 @@
 <?php
 include 'config.php';
 
-// Processamento do formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']); // remove espacos em branco
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT); // hash seguro
+    $username = trim($_POST['username']);
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     
     try {
-        // prepared statements contra SQL Injection
         $stmt = $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
         $stmt->execute([$username, $password]);
-        
-        // mensagem de sucesso
-        $_SESSION['message'] = "Registro com sucesso! Por favor faça o login agora.";
-        header("Location: login.php"); // redirecionamento pos-registro
+        $_SESSION['message'] = "Registration successful! Please login.";
+        header("Location: login.php");
         exit();
     } catch (PDOException $e) {
-        // Mensagem genérica (evita enumeração de usuarios)
-        $error = "Nome de usuário invalido!"; 
+        $error = "Username already exists!";
     }
 }
 
-include 'header.php'; // Cabeçalho comum
+include 'header.php';
 ?>
 
 <h1>Registrar</h1>
 <?php if (isset($error)) echo "<p>$error</p>" ?>
-<!-- ⚠️ galta sanitizacao da mensagem de erro (XSS potencial) -->
-
 <form method="post">
-    <!-- ⚠️ falta validacao de complexidade de senha no client-side -->
-    <!-- ⚠️ nao possui campo de confirmacao de senha -->
-    <!-- ⚠️ falta CSRF token -->
-    
     <input type="text" name="username" placeholder="Username" required>
     <input type="password" name="password" placeholder="Password" required>
     <button type="submit">Registrar</button>

@@ -1,38 +1,25 @@
 <?php
 include 'config.php';
 
-// verifica se usuario esta logado
-// se nao existir sessao 'user', redireciona para login
-if (!isset($_session['user'])) {
-    header("location: login.php");
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php");
     exit();
 }
 
-// verifica se recebeu id via get
-if (isset($_get['id'])) {
-    // captura id do post a ser deletado
-    $post_id = $_get['id'];
-    
-    // consulta o post no banco usando prepared statement
-    $stmt = $pdo->prepare("select * from posts where id = ?");
+if (isset($_GET['id'])) {
+    $post_id = $_GET['id'];
+    $stmt = $pdo->prepare("SELECT * FROM posts WHERE id = ?");
     $stmt->execute([$post_id]);
     $post = $stmt->fetch();
 
-    // verifica permissoes:
-    // 1. se post existe
-    // 2. se usuario e dono do post ou administrador
-    if ($post && ($_session['user']['id'] == $post['user_id'] || $_session['user']['is_admin'])) {
-        // prepara e executa delete usando prepared statement
-        $stmt = $pdo->prepare("delete from posts where id = ?");
+    if ($post && ($_SESSION['user']['id'] == $post['user_id'] || $_SESSION['user']['is_admin'])) {
+        $stmt = $pdo->prepare("DELETE FROM posts WHERE id = ?");
         $stmt->execute([$post_id]);
-        // mensagem de sucesso na sessao
-        $_session['message'] = "post deletado com sucesso!.";
+        $_SESSION['message'] = "Post deletado com sucesso!.";
     } else {
-        // mensagem de erro na sessao
-        $_session['message'] = "voce nao tem permissao para deletar esse post.";
+        $_SESSION['message'] = "Você não tem permissão para deletar esse post.";
     }
 }
 
-// redireciona para pagina inicial independente do resultado
-header("location: index.php");
+header("Location: index.php");
 exit();
